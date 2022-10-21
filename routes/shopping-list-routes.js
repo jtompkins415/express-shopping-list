@@ -24,11 +24,12 @@ router.post('/items', (req, resp, next) => {
 })
 
 router.get('/items/:name', (req, resp, next) => {
-  try{
-    console.log(req.params)
-  }catch(e) {
-    next(e)
-  }
+    const foundItem = items.find(item => item.name === req.params.name)
+    if(foundItem === undefined){
+      throw new ExpressError('Item not found', 404)
+    }
+    return resp.send({ name: foundItem.name, price: foundItem.price})
+  
 })
 
 router.patch('/items/:name', (req, resp, next) => {
@@ -37,7 +38,18 @@ router.patch('/items/:name', (req, resp, next) => {
     throw new ExpressError("Item not found", 404)
   }
   foundItem.name = req.body.name 
-  resp.json({ updated: foundCat })
+  foundItem.price = req.body.price
+  resp.json({ updated: foundItem })
 })
+
+router.delete('/items/:name', (req, resp, next) => {
+  const foundItem = items.find(item => item.name === req.params.name)
+  if (foundItem === undefined) {
+    throw new ExpressError("Item not found", 404)
+  }
+  items.pop(foundItem)
+  return resp.json({ message: "Deleted" })
+})
+
 
 module.exports = router
