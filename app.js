@@ -1,21 +1,25 @@
-const express = require('express')
-const ExpressError = require('./expressError')
-const shoppingRoutes = require('./routes/shopping-list-routes')
+const express = require("express")
+const app = express();
+const shoppingRoutes = require("./routes/shopping-list-routes")
+const ExpressError = require("./expressError")
 
-const app = express()
+app.use(express.json());
+app.use("/shopping-list", shoppingRoutes);
 
-app.use(express.json())
-app.use('/shopping-list', shoppingRoutes)
+/** 404 handler */
 
-
-//Global Error
-app.use((err, req, res, next) => {
-    let status = err.status || 500;
-    let message = err.message;
-
-    return res.status(status).json({
-        error: {message, status}
-    });
+app.use(function(req, res, next) {
+  return new ExpressError("Not Found", 404);
 });
 
-module.exports = app 
+/** general error handler */
+
+app.use((err, req, res, next) => {
+  res.status(err.status || 500);
+
+  return res.json({
+    error: err.message,
+  });
+});
+
+module.exports = app;
